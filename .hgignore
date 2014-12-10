@@ -1,0 +1,9 @@
+syntax: glob
+*.pyc
+*.pyo
+*.egg-info
+.coverage
+.cache
+build
+.idea
+dist
