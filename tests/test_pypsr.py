@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 import pypsr
 
@@ -7,6 +8,12 @@ def test_ami():
     a = np.arange(100)
     assert np.isclose(np.exp(pypsr.ami(a, a)), 10)
     assert np.isclose(pypsr.ami(a, np.ones_like(a)), 0)
+
+
+def test_ami_different_length_signals():
+    a = np.arange(10)
+    with pytest.raises(ValueError):
+        pypsr.ami(a, a[:-1])
 
 
 def test_lagged_ami():
