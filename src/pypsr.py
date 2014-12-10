@@ -73,10 +73,9 @@ def lagged_ami(x, min_lag=0, max_lag=None, lag_step=1, n_bins=10):
 
 
 def _vector_pair(a, b):
-    a = np.asarray(a)
+    a = np.squeeze(a)
     if b is None:
-        a = np.squeeze(a)
         if a.ndim != 2 or a.shape[1] != 2:
             raise ValueError('with one input, array must have be 2D with two columns')
         a, b = a[:, 0], a[:, 1]
-    return a, np.asarray(b)
+    return a, np.squeeze(b)
