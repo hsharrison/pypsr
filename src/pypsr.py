@@ -1,5 +1,5 @@
 import numpy as np
-from sklearn.metrics import mutual_info_score
+from sklearn import metrics
 
 
 def ami(x, y=None, n_bins=10):
@@ -33,7 +33,7 @@ def ami(x, y=None, n_bins=10):
     if x.shape[0] != y.shape[0]:
         raise ValueError('timeseries must have the same length')
 
-    return mutual_info_score(None, None, contingency=np.histogram2d(x, y, bins=n_bins)[0])
+    return metrics.mutual_info_score(None, None, contingency=np.histogram2d(x, y, bins=n_bins)[0])
 
 
 def lagged_ami(x, min_lag=0, max_lag=None, lag_step=1, n_bins=10):
