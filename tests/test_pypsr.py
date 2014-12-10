@@ -16,6 +16,11 @@ def test_ami_different_length_signals():
         pypsr.ami(a, a[:-1])
 
 
+def test_ami_only_one_signal():
+    with pytest.raises(ValueError):
+        pypsr.ami(np.arange(10))
+
+
 def test_lagged_ami():
     lags, ami = pypsr.lagged_ami(np.arange(10), min_lag=0, max_lag=5)
     assert lags.dtype == 'int64'
