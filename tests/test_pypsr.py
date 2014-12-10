@@ -10,6 +10,11 @@ def test_ami():
     assert np.isclose(pypsr.ami(a, np.ones_like(a)), 0)
 
 
+def test_ami_two_column_input():
+    a = np.arange(100)
+    assert np.isclose(np.exp(pypsr.ami(np.vstack((a, a)).transpose())), 10)
+
+
 def test_ami_different_length_signals():
     a = np.arange(10)
     with pytest.raises(ValueError):
