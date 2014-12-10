@@ -45,3 +45,25 @@ def test_lagged_ami_unsqueezed_vector():
     lags, ami = pypsr.lagged_ami(a)
     assert np.all(lags == np.arange(5))
     assert np.all(np.isclose(np.exp(ami), np.arange(10, 5, -1)))
+
+
+def test_reconstruction():
+    assert np.all(
+        pypsr.reconstruct(np.arange(10), 1, 2) == np.vstack((np.arange(9), np.arange(1, 10))).transpose()
+    )
+    assert np.all(
+        pypsr.reconstruct(np.arange(10), 2, 3)
+        == np.vstack((np.arange(6), np.arange(2, 8), np.arange(4, 10))).transpose()
+    )
+
+
+def test_reconstruction_wrong_dimension_input():
+    with pytest.raises(ValueError):
+        pypsr.reconstruct(np.ones((10, 10)), 1, 2)
+
+
+def test_reconstruction_too_long_lag():
+    with pytest.raises(ValueError):
+        pypsr.reconstruct(np.ones(10), 5, 2)
+    with pytest.raises(ValueError):
+        pypsr.reconstruct(np.ones(10), 2, 5)

@@ -2,6 +2,40 @@ import numpy as np
 from sklearn import metrics
 
 
+def reconstruct(x, lag, n_dims):
+    """Phase-space reconstruction.
+
+    Given a signal $x(t)$, dimensionality $d$, and lag $\tau$, return the reconstructed signal
+    \[
+        \mathbf{y}(t) = [x(t), x(t + \tau), \ldots, x(t + (d - 1)\tau)].
+    \]
+
+    Parameters
+    ----------
+    x : array-like
+        Original signal $x(t)$.
+    lag : int
+        Time lag $\tau$ in units of the sampling time $h$ of $x(t)$.
+    n_dims : int
+        Embedding dimension $d$.
+
+    Returns
+    -------
+    ndarray
+        $\mathbf{y}(t)$ as an array with $d$ columns.
+
+    """
+    x = np.squeeze(x)
+    if x.ndim != 1:
+        raise ValueError('x(t) must be a 1-dimensional signal')
+
+    if lag * (n_dims - 1) >= x.shape[0] // 2:
+        raise ValueError('longest lag cannot be longer than half the length of x(t)')
+
+    lags = lag * np.arange(n_dims)
+    return np.vstack(x[lag:lag - lags[-1] or None] for lag in lags).transpose()
+
+
 def ami(x, y=None, n_bins=10):
     """Calculate the average mutual information between $x(t)$ and $y(t)$.
 
@@ -68,7 +102,7 @@ def lagged_ami(x, min_lag=0, max_lag=None, lag_step=1, n_bins=10):
         max_lag = x.shape[0]//2
     lags = np.arange(min_lag, max_lag, lag_step)
 
-    amis = [ami(x[lag:], np.roll(x, lag)[lag:], n_bins=n_bins) for lag in lags]
+    amis = [ami(reconstruct(x, lag, 2), n_bins=n_bins) for lag in lags]
     return lags, np.array(amis)
 
 
