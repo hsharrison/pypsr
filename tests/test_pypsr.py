@@ -15,3 +15,9 @@ def test_lagged_ami():
     assert ami.dtype == 'float64'
     assert np.all(lags == np.arange(5))
     assert np.all(np.isclose(np.exp(ami), np.arange(10, 5, -1)))
+
+
+def test_ami_unsqueezed_vector():
+    a = np.arange(10)[:, np.newaxis]
+    assert np.isclose(np.exp(pypsr.ami(a, a)), 10)
+    assert np.isclose(pypsr.ami(a, np.ones_like(a)), 0)
