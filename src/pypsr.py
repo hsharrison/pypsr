@@ -93,6 +93,7 @@ def lagged_ami(x, min_lag=0, max_lag=None, lag_step=1, n_bins=10):
         The evaluated lags $\tau_i$, in units of $h$.
     amis : ndarray
         The average mutual information between $x(t)$ and $x(t + \tau_i)$.
+
     See Also
     --------
     ami
