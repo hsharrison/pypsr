@@ -1,5 +1,93 @@
+from operator import sub
+
 import numpy as np
 from sklearn import metrics
+from sklearn.neighbors import NearestNeighbors
+from toolz import curry
+
+
+def global_false_nearest_neighbors(x, lag, min_dims=1, max_dims=10, **cutoffs):
+    """
+    Across a range of embedding dimensions $d$, embeds $x(t)$ with lag $\tau$, finds all nearest neighbors,
+    and computes the percentage of neighbors that that remain neighbors when an additional dimension is unfolded.
+    See [1] for more information.
+
+    Parameters
+    ----------
+    x : array-like
+        Original signal $x(t).
+    lag : int
+        Time lag $\tau$ in units of the sampling time $h$ of $x(t)$.
+    min_dims : int, optional
+        The smallest embedding dimension $d$ to test.
+    max_dims : int, optional
+        The largest embedding dimension $d$ to test.
+    relative_distance_cutoff : float, optional
+        The cutoff for determining neighborliness,
+        in distance increase relative to the original distance between neighboring points.
+        The default, 15, is suggested in [1] (p. 41).
+    relative_radius_cutoff : float, optional
+        The cutoff for determining neighborliness,
+        in distance increase relative to the radius of the attractor.
+        The default, 2, is suggested in [1] (p. 42).
+
+    See Also
+    --------
+    reconstruct
+
+    References
+    ----------
+    [1] Arbanel, H. D. (1996). *Analysis of Observed Chaotic Data* (pp. 40-43). New York: Springer.
+
+    """
+    x = np.squeeze(x)
+    if x.ndim != 1:
+        raise ValueError('x(t) must be a 1-dimensional signal')
+
+    dimensions = np.arange(min_dims, max_dims + 1)
+    false_neighbor_pcts = np.array([_gfnn(x, lag, n_dims, **cutoffs) for n_dims in dimensions])
+    return dimensions, false_neighbor_pcts
+
+
+def _gfnn(x, lag, n_dims, **cutoffs):
+    # Global false nearest neighbors at a particular dimension.
+    # Returns percent of all nearest neighbors that are still neighbors when the next dimension is unfolded.
+    # Neighbors that can't be embedded due to lack of data are not counted in the denominator.
+    offset = lag*n_dims
+    is_true_neighbor = _is_true_neighbor(x, _radius(x), offset)
+    return np.mean([
+        not is_true_neighbor(indices, distance, **cutoffs)
+        for indices, distance in _nearest_neighbors(reconstruct(x, lag, n_dims))
+        if (indices + offset < x.size).all()
+    ])
+
+
+def _radius(x):
+    # Per Arbanel (p. 42):
+    # "the nominal 'radius' of the attractor defined as the RMS value of the data about its mean."
+    return np.sqrt(((x - x.mean())**2).mean())
+
+
+@curry
+def _is_true_neighbor(
+        x, attractor_radius, offset, indices, distance,
+        relative_distance_cutoff=15,
+        relative_radius_cutoff=2
+):
+    distance_increase = np.abs(sub(*x[indices + offset]))
+    return (distance_increase / distance < relative_distance_cutoff and
+            distance_increase / attractor_radius < relative_radius_cutoff)
+
+
+def _nearest_neighbors(y):
+    """
+    Wrapper for sklearn.neighbors.NearestNeighbors.
+    Yields the indices of the neighboring points, and the distance between them.
+
+    """
+    distances, indices = NearestNeighbors(n_neighbors=2, algorithm='kd_tree').fit(y).kneighbors(y)
+    for distance, index in zip(distances, indices):
+        yield index, distance[1]
 
 
 def reconstruct(x, lag, n_dims):

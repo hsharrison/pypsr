@@ -67,3 +67,16 @@ def test_reconstruction_too_long_lag():
         pypsr.reconstruct(np.ones(10), 5, 2)
     with pytest.raises(ValueError):
         pypsr.reconstruct(np.ones(10), 2, 5)
+
+
+def test_gfnn():
+    test_data = np.loadtxt('gfnn_test_data.csv', delimiter=',')
+    known_gfnn = np.loadtxt('test_data_lag_30_gfnn.csv', delimiter=',')
+    lags, gfnn = pypsr.global_false_nearest_neighbors(test_data, 30, max_dims=known_gfnn.size)
+    assert (lags == np.arange(1, known_gfnn.size + 1)).all()
+    assert np.isclose(gfnn, known_gfnn).all()
+
+
+def test_gfnn_wrong_dimension_input():
+    with pytest.raises(ValueError):
+        pypsr.global_false_nearest_neighbors(np.ones((10, 10)), 30)

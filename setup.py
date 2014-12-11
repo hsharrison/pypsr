@@ -43,5 +43,6 @@ setup(
         'numpy',
         'scipy',
         'scikit-learn',
+        'toolz',
     ],
 )
