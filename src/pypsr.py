@@ -40,9 +40,7 @@ def global_false_nearest_neighbors(x, lag, min_dims=1, max_dims=10, **cutoffs):
     [1] Arbanel, H. D. (1996). *Analysis of Observed Chaotic Data* (pp. 40-43). New York: Springer.
 
     """
-    x = np.squeeze(x)
-    if x.ndim != 1:
-        raise ValueError('x(t) must be a 1-dimensional signal')
+    x = _vector(x)
 
     dimensions = np.arange(min_dims, max_dims + 1)
     false_neighbor_pcts = np.array([_gfnn(x, lag, n_dims, **cutoffs) for n_dims in dimensions])
@@ -113,9 +111,7 @@ def reconstruct(x, lag, n_dims):
         $\mathbf{y}(t)$ as an array with $d$ columns.
 
     """
-    x = np.squeeze(x)
-    if x.ndim != 1:
-        raise ValueError('x(t) must be a 1-dimensional signal')
+    x = _vector(x)
 
     if lag * (n_dims - 1) >= x.shape[0] // 2:
         raise ValueError('longest lag cannot be longer than half the length of x(t)')
@@ -202,3 +198,10 @@ def _vector_pair(a, b):
             raise ValueError('with one input, array must have be 2D with two columns')
         a, b = a[:, 0], a[:, 1]
     return a, np.squeeze(b)
+
+
+def _vector(x):
+    x = np.squeeze(x)
+    if x.ndim != 1:
+        raise ValueError('x(t) must be a 1-dimensional signal')
+    return x
