@@ -31,6 +31,13 @@ def global_false_nearest_neighbors(x, lag, min_dims=1, max_dims=10, **cutoffs):
         in distance increase relative to the radius of the attractor.
         The default, 2, is suggested in [1] (p. 42).
 
+    Returns
+    -------
+    dims : ndarray
+        The tested dimensions $d$.
+    gfnn : ndarray
+        The percentage of nearest neighbors that are false neighbors at each dimension.
+
     See Also
     --------
     reconstruct
