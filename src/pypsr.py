@@ -124,7 +124,7 @@ def reconstruct(x, lag, n_dims):
         raise ValueError('longest lag cannot be longer than half the length of x(t)')
 
     lags = lag * np.arange(n_dims)
-    return np.vstack(x[lag:lag - lags[-1] or None] for lag in lags).transpose()
+    return np.vstack([x[lag:lag - lags[-1] or None] for lag in lags]).transpose()
 
 
 def ami(x, y=None, n_bins=10):
